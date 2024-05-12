@@ -4,42 +4,44 @@
 using namespace std;
 
 //---------------------
-#define RED  "\x1B[31m"
-#define GRN  "\x1B[32m"
-#define YEL  "\x1B[33m"
-#define BLU  "\x1B[34m"
-#define MAG  "\x1B[35m"
-#define CYN  "\x1B[36m"
-#define WHT  "\x1B[37m"
-#define END  "\033[0m"
+#define RED "\x1B[31m"
+#define GRN "\x1B[32m"
+#define YEL "\x1B[33m"
+#define BLU "\x1B[34m"
+#define MAG "\x1B[35m"
+#define CYN "\x1B[36m"
+#define WHT "\x1B[37m"
+#define END "\033[0m"
 //---------------------
-
 
 int main(int argc, char *argv[])
 {
     gitClass gitClassObj;
-    if(argc >= 2)
+    if (argc >= 2)
     {
         string argument = string(argv[1]);
-        //git init
+        // git init
         if (argument == "init")
         {
             gitClassObj.gitInit();
-            cout <<GRN "git repository initialized successfully!" END<< endl;
-            
+            cout << GRN "git repository initialized successfully!" END << endl;
         }
-        //git add
-        else if (argument == "add")                                               
+        // git add
+        else if (argument == "add")
         {
-            if(argc == 2){     
-                cout << RED "missing arguments!" <<endl;
+            if (argc == 2)
+            {
+                cout << RED "missing arguments!" << endl;
                 cout << "Provide a third argument e.g." << endl;
                 cout << "git add <'.' | 'file_name'>" END << endl;
             }
-            if(argc >= 3){
-                if(argc == 3){
+            if (argc >= 3)
+            {
+                if (argc == 3)
+                {
                     string argumentC = string(argv[2]);
-                    if (argumentC == ".") {
+                    if (argumentC == ".")
+                    {
                         gitClassObj.gitAdd();
                     }
                     else
@@ -47,45 +49,45 @@ int main(int argc, char *argv[])
                         string files[1] = {string(argv[2])};
                         gitClassObj.gitAdd(files, 1);
                     }
-
-                } else {
-                    string files[argc-2];
-                    for (int i = 0; i < argc-2; i++)
+                }
+                else
+                {
+                    string files[argc - 2];
+                    for (int i = 0; i < argc - 2; i++)
                     {
-                        files[i] = string(argv[i]); 
+                        files[i] = string(argv[i + 2]);
                     }
-                    gitClassObj.gitAdd(files, argc-2);
+                    gitClassObj.gitAdd(files, argc - 2);
                 }
             }
-            
         }
-        //git commit
+        // git commit
         else if (argument == "commit")
         {
-            if(argc == 4)    //[ git, commit, -m, "msg" ]
+            if (argc == 4) // [ git, commit, -m, "msg" ]
             {
-                string argumentC = string(argv[2]);    
-                string argumentD = string(argv[3]);      
-                if(argumentC == "-m")
+                string argumentC = string(argv[2]);
+                string argumentD = string(argv[3]);
+                if (argumentC == "-m")
                 {
                     gitClassObj.gitCommit(argumentD);
                     cout << "files commited successfully" << endl;
                 }
             }
-            else 
+            else
             {
-                cout << RED "missing arguments!" <<endl;
+                cout << RED "missing arguments!" << endl;
                 cout << "Provide with a message field e.g." << endl;
                 cout << "git commit -m 'my commit message'" END << endl;
             }
         }
         // git revert
-        else if(argument == "revert")
+        else if (argument == "revert")
         {
-            if(argc == 3)
+            if (argc == 3)
             {
                 string argumentC = string(argv[2]);
-                if(argumentC == "HEAD")
+                if (argumentC == "HEAD")
                 {
                     gitClassObj.gitRevert(argumentC);
                     cout << "The project is now at HEAD" << endl;
@@ -96,30 +98,46 @@ int main(int argc, char *argv[])
                     cout << "Reverted to <commit_id> commit" << endl;
                 }
             }
-            else 
+            else
             {
                 cout << RED "invalid arguments, should be like: " << endl;
-                cout << "git revert <'HEAD'|'commit_hash'>" END<< endl;
+                cout << "git revert <'HEAD'|'commit_hash'>" END << endl;
             }
         }
-        // //git log
-        else if(argument == "log")
+        // git rm (remove from staging area)
+        else if (argument == "rm")
+        {
+            if (argc == 3)
+            {
+                string fileToRemove = string(argv[2]);
+                if (filesystem::exists(filesystem::current_path() / ".git" / "staging_area" / fileToRemove))
+                {
+                    filesystem::remove(filesystem::current_path() / ".git" / "staging_area" / fileToRemove);
+                    cout << "File " << fileToRemove << " removed from staging area." << endl;
+                }
+                else
+                {
+                    cout << RED "File " << fileToRemove << " not found in staging area." END << endl;
+                }
+            }
+            else
+            {
+                cout << RED "Missing file name argument." << endl;
+                cout << "Usage: git rm <file_name>" END << endl;
+            }
+        }
+        // git log
+        else if (argument == "log")
         {
             gitClassObj.gitLog();
         }
-        //git status
-        // else if(argument == "status")
-        // {
-        //     gitClassObj.gitStatus();
-        // }
-        //wrong arguments
+        // wrong arguments
         else
         {
             cout << RED "Invalid arguments" END << endl;
         }
-
     }
-    else 
+    else
     {
         cout << YEL "git is version control system made by linus Torvalds, this project is a clone of that original system with minimal features \n\n";
 
@@ -127,6 +145,7 @@ int main(int argc, char *argv[])
         cout << "git init                           ->   initialize an empty git repository in the current dir" << endl;
         cout << "git add <'.'|'file_name'>          ->   add the files to staging area" << endl;
         cout << "git commit <m 'commit message'>    ->   commit your staging files" << endl;
-        cout << "git revert <'HEAD'|'commit_hash'>  ->   rollback to a specific commit" END << endl;
+        cout << "git revert <'HEAD'|'commit_hash'>  ->   rollback to a specific commit" << endl;
+        cout << "git rm <file_name>                 ->   remove a file from the staging area" END << endl;
     }
 }

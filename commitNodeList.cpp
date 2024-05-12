@@ -5,7 +5,7 @@
 #include <ctime>
 #include <vector>
 using namespace std;
-using namespace std::filesystem;
+using namespace std::filesystem; 
 
 // ================  Global Functions  ==================
 string gen_random(const int len)
@@ -84,18 +84,32 @@ public:
     }
 
     void revertCommitNode(string fromHash)
+{
+    auto dataPath = filesystem::current_path() / ".git" / "commits" / getCommitID() / "Data";
+    if (!filesystem::exists(dataPath))
     {
-        filesystem::create_directories(filesystem::current_path() / ".git" / "commits" / getCommitID() / "Data");
-        auto nextCommitPath = filesystem::current_path() / ".git" / "commits" / getCommitID() / "commitInfo.txt";
-        auto copyFrom = filesystem::current_path() / ".git" / "commits" / fromHash / "Data";
-        ofstream write(nextCommitPath.string());
-        write << "1." + commitID + "\n" +
-                     "2." + commitMsg + "\n" +
-                     "3." + get_time() + "\n";
-        const auto copyOptions = filesystem::copy_options::recursive;
-        // cout << "from: "  << copyFrom << " ---- " << "copy to: " << filesystem::current_path() / ".git" / "commits" / getCommitID() / "Data" << endl;
-        filesystem::copy(copyFrom, filesystem::current_path() / ".git" / "commits" / getCommitID() / "Data", copyOptions);
+        filesystem::create_directories(dataPath);
     }
+
+    auto nextCommitPath = filesystem::current_path() / ".git" / "commits" / getCommitID() / "commitInfo.txt";
+    auto copyFrom = filesystem::current_path() / ".git" / "commits" / fromHash / "Data";
+    ofstream write(nextCommitPath.string());
+    write << "1." + commitID + "\n" +
+                "2." + commitMsg + "\n" +
+                "3." + get_time() + "\n";
+    const auto copyOptions = filesystem::copy_options::recursive | filesystem::copy_options::overwrite_existing;
+
+    for (const auto& entry : filesystem::recursive_directory_iterator(copyFrom))
+    {
+        if (!filesystem::is_directory(entry))
+        {
+            auto relativePath = filesystem::relative(entry, copyFrom);
+            auto destPath = dataPath / relativePath;
+            filesystem::create_directories(destPath.parent_path());
+            filesystem::copy(entry, destPath, copyOptions);
+        }
+    }
+}
 
     void readNodeInfo()
     {

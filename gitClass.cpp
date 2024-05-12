@@ -5,8 +5,7 @@
 
 #include "commitNodeList.cpp"
 using namespace std;
-using namespace std::filesystem;
-
+using namespace std::filesystem; 
 //---------------------
 #define RED "\x1B[31m"
 #define GRN "\x1B[32m"
@@ -28,6 +27,7 @@ public:
     void gitCommit(string msg);
     void gitRevert(string commitHash);
     void gitLog();
+    // void gitStatus();
 };
 
 void gitClass::gitInit()
@@ -48,14 +48,10 @@ void gitClass::gitAdd()
         {
             if (filesystem::is_directory(fileName))
             {
-                cout << "Source Path: " << dirEntry << endl;
-                cout << "Destination Path: " << filesystem::current_path() / ".git" / "staging_area" / dirEntry.path().filename() << endl;
-                filesystem::copy(dirEntry, filesystem::current_path() / ".git" / "staging_area" / dirEntry.path().filename(), copyOptions);
+                filesystem::copy(dirEntry, filesystem::current_path() / ".git" / "staging_area" / fileName, copyOptions);
             }
             else
             {
-                cout << "Source Path: " << dirEntry << endl;
-                cout << "Destination Path: " << filesystem::current_path() / ".git" / "staging_area" / "" << endl;
                 filesystem::copy(dirEntry, filesystem::current_path() / ".git" / "staging_area" / "", copyOptions);
             }
         }
@@ -75,29 +71,23 @@ void gitClass::gitAdd(string files[], int arrSize)
             {
                 auto newDir = filesystem::current_path() / ".git" / "staging_area" / files[i].substr(0, last_index);
                 filesystem::create_directories(newDir);
-                cout << "Source Path: " << filesystem::current_path() / files[i] << endl;
-                cout << "Destination Path: " << filesystem::current_path() / ".git" / "staging_area" / files[i] << endl;
                 filesystem::copy(filesystem::current_path() / files[i], filesystem::current_path() / ".git" / "staging_area" / files[i], copyOptions);
             }
             else
             {
                 if (filesystem::is_directory(files[i]))
                 {
-                    cout << "Source Path: " << filesystem::current_path() / files[i] << endl;
-                    cout << "Destination Path: " << filesystem::current_path() / ".git" / "staging_area" / files[i] << endl;
                     filesystem::copy(filesystem::current_path() / files[i], filesystem::current_path() / ".git" / "staging_area" / files[i], copyOptions);
                 }
                 else
                 {
-                    cout << "Source Path: " << filesystem::current_path() / files[i] << endl;
-                    cout << "Destination Path: " << filesystem::current_path() / ".git" / "staging_area" << endl;
                     filesystem::copy(filesystem::current_path() / files[i], filesystem::current_path() / ".git" / "staging_area", copyOptions);
                 }
             }
         }
         else
         {
-            cout << files[i] << RED " does not exist!" END << endl;
+            cout << files[i] << RED "does not exist!" END << endl;
         }
     }
 }
@@ -117,3 +107,7 @@ void gitClass::gitLog()
     list.printCommitList();
 }
 
+// void gitClass::gitStatus()
+// {
+//     list.printCommitStatus();
+// }
